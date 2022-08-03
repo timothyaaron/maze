@@ -7,19 +7,22 @@ WHITE = (255, 255, 255)
 BLUE = (0, 0, 255)
 GREEN = (0, 255, 0)
 RED = (255, 0, 0)
-YELLOW = (255, 255, 0)
-GREY = (46, 49, 49, 1)
+GREY = (235, 235, 235)
 
-WIDTH, HEIGHT = 5, 5
+WIDTH, HEIGHT = 20, 15
 CELL_WIDTH = 40
+TRACER_WIDTH = 2
 MARGIN = 10
-DISPLAY = (WIDTH * CELL_WIDTH + MARGIN * 2, HEIGHT * CELL_WIDTH + MARGIN * 2)
+DISPLAY_SIZE = (
+    WIDTH * CELL_WIDTH + MARGIN * 2,
+    HEIGHT * CELL_WIDTH + MARGIN * 2
+)
 
 pygame.init()
 pygame.mixer.init()
 pygame.display.set_caption("Maze generator")
-win = pygame.display.set_mode(DISPLAY)
-win.fill(WHITE)
+win = pygame.display.set_mode(DISPLAY_SIZE)
+win.fill(GREY)
 pygame.display.update()
 Fps = 30
 clock = pygame.time.Clock()
@@ -47,22 +50,22 @@ def build_grid(width, height, cw=CELL_WIDTH):
 
 
 def knockdown_east_wall(x, y):
-    pygame.draw.rect(win, YELLOW, (x + 1, y + 1, (CELL_WIDTH*2 - 1), CELL_WIDTH-1), 0)
+    pygame.draw.rect(win, WHITE, (x + 1, y + 1, (CELL_WIDTH*2 - 1), CELL_WIDTH-1), 0)
     pygame.display.update()
 
 
 def knockdown_west_wall(x, y):
-    pygame.draw.rect(win, YELLOW, (x - CELL_WIDTH  + 1, y + 1, (CELL_WIDTH*2 - 1), CELL_WIDTH-1), 0)
+    pygame.draw.rect(win, WHITE, (x - CELL_WIDTH  + 1, y + 1, (CELL_WIDTH*2 - 1), CELL_WIDTH-1), 0)
     pygame.display.update()
 
 
 def knockdown_north_wall(x, y):
-    pygame.draw.rect(win, YELLOW, (x + 1, y - CELL_WIDTH + 1, CELL_WIDTH-1, (CELL_WIDTH*2 - 1)), 0)
+    pygame.draw.rect(win, WHITE, (x + 1, y - CELL_WIDTH + 1, CELL_WIDTH-1, (CELL_WIDTH*2 - 1)), 0)
     pygame.display.update()
 
 
 def knockdown_south_wall(x, y):
-    pygame.draw.rect(win, YELLOW, (x + 1, y + 1, CELL_WIDTH-1, (CELL_WIDTH*2 - 1)), 0)
+    pygame.draw.rect(win, WHITE, (x + 1, y + 1, CELL_WIDTH-1, (CELL_WIDTH*2 - 1)), 0)
     pygame.display.update()
 
 
@@ -72,12 +75,7 @@ def single_cell(x, y):
 
 
 def backtracking_cell(x, y):
-    pygame.draw.rect(win, YELLOW, (x + 1, y+1, CELL_WIDTH-2, CELL_WIDTH-2), 0)
-    pygame.display.update()
-
-
-def path_tracker(x, y):
-    pygame.draw.rect(win, GREEN, (x + 8, y + 8, 10, 10),0)
+    pygame.draw.rect(win, WHITE, (x + 1, y+1, CELL_WIDTH-2, CELL_WIDTH-2), 0)
     pygame.display.update()
 
 
@@ -88,7 +86,6 @@ def maze(margin=MARGIN):
     closed_list.append((x,y))
 
     while len(stack_list) > 0:
-        time.sleep(0.07)
         cell = []
 
         if(x + CELL_WIDTH, y) not in closed_list and (x + CELL_WIDTH, y) in grid:
@@ -134,16 +131,33 @@ def maze(margin=MARGIN):
                 closed_list.append((x, y))
                 stack_list.append((x, y))
 
+            time.sleep(0.03)
+
         else:
             x, y = stack_list.pop()
             single_cell(x, y)
-            time.sleep(0.05)
+            time.sleep(0.03)
             backtracking_cell(x, y)
+
+
+def path_tracker(x, y):
+    pygame.draw.rect(
+        win,
+        BLUE,
+        (
+            x + CELL_WIDTH//2 - TRACER_WIDTH//2,
+            y + CELL_WIDTH//2 - TRACER_WIDTH//2,
+            TRACER_WIDTH,
+            TRACER_WIDTH
+        ),
+        0
+    )
+    pygame.display.update()
 
 
 def path_tracer(x, y):
     path_tracker(x,y)
-    while (x, y) != (CELL_WIDTH, CELL_WIDTH):
+    while (x, y) != (MARGIN, MARGIN):
         x, y = path[x, y]
         path_tracker(x,y)
         time.sleep(0.1)
@@ -151,12 +165,15 @@ def path_tracer(x, y):
 
 build_grid(WIDTH, HEIGHT)
 maze()
-path_tracer(WIDTH * CELL_WIDTH + MARGIN, HEIGHT * CELL_WIDTH + MARGIN)
+path_tracer(
+    (WIDTH - 1) * CELL_WIDTH + MARGIN,
+    (HEIGHT - 1) * CELL_WIDTH + MARGIN
+)
 
-RUN = True
-while RUN:
-    clock.tick(Fps)
+# RUN = True
+# while RUN:
+#     clock.tick(Fps)
 
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            RUN = False
+#     for event in pygame.event.get():
+#         if event.type == pygame.QUIT:
+#             RUN = False
