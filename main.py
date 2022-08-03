@@ -10,140 +10,148 @@ RED = (255, 0, 0)
 YELLOW = (255, 255, 0)
 GREY = (46, 49, 49, 1)
 
-Width, Height = 1680, 1050
+WIDTH, HEIGHT = 5, 5
+CELL_WIDTH = 40
+MARGIN = 10
+DISPLAY = (WIDTH * CELL_WIDTH + MARGIN * 2, HEIGHT * CELL_WIDTH + MARGIN * 2)
 
 pygame.init()
 pygame.mixer.init()
 pygame.display.set_caption("Maze generator")
-win = pygame.display.set_mode((Width, Height))
+win = pygame.display.set_mode(DISPLAY)
 win.fill(WHITE)
 pygame.display.update()
 Fps = 30
 clock = pygame.time.Clock()
 
 
-
-cell_width = 40
-x = 0
-y = 0
-
 grid = []
 stack_list = []
 closed_list = []
 
 path = {}
-time.sleep(2)
-def build_grid(x, y, cell_width=cell_width):
-    for n in range(20):
-        x = 40
-        y = y + 40
-        for m in range(20):
-            pygame.draw.line(win, BLACK, [x + cell_width, y], [x + cell_width, y + cell_width], 2) # East wall
-            pygame.draw.line(win, BLACK, [x , y], [x, y + cell_width], 2) # West wall
-            pygame.draw.line(win, BLACK, [x, y], [x + cell_width, y], 2) # North wall
-            pygame.draw.line(win, BLACK, [x, y + cell_width], [x + cell_width, y + cell_width], 2) # South wall
+
+
+def build_grid(width, height, cw=CELL_WIDTH):
+    for n in range(height):
+        y = cw * n + MARGIN
+        for m in range(width):
+            x = cw * m + MARGIN
+            pygame.draw.line(win, BLACK, [x + cw, y], [x + cw, y + cw], 2) # East wall
+            pygame.draw.line(win, BLACK, [x , y], [x, y + cw], 2) # West wall
+            pygame.draw.line(win, BLACK, [x, y], [x + cw, y], 2) # North wall
+            pygame.draw.line(win, BLACK, [x, y + cw], [x + cw, y + cw], 2) # South wall
 
             grid.append((x,y))
-            x = x + 40
             pygame.display.update()
 
-def Knockdown_East_Wall(x, y):
-    pygame.draw.rect(win, YELLOW, (x + 1, y + 1, 79, 39), 0)
-    pygame.display.update()
-def Knockdown_West_Wall(x, y):
-    pygame.draw.rect(win, YELLOW, (x - cell_width  + 1, y + 1, 79, 39), 0)
+
+def knockdown_east_wall(x, y):
+    pygame.draw.rect(win, YELLOW, (x + 1, y + 1, (CELL_WIDTH*2 - 1), CELL_WIDTH-1), 0)
     pygame.display.update()
 
-def Knockdown_North_Wall(x, y):
-    pygame.draw.rect(win, YELLOW, (x + 1, y - cell_width + 1, 39, 79), 0)
+
+def knockdown_west_wall(x, y):
+    pygame.draw.rect(win, YELLOW, (x - CELL_WIDTH  + 1, y + 1, (CELL_WIDTH*2 - 1), CELL_WIDTH-1), 0)
     pygame.display.update()
 
-def Knockdown_South_Wall(x, y):
-    pygame.draw.rect(win, YELLOW, (x + 1, y + 1, 39, 79), 0)
+
+def knockdown_north_wall(x, y):
+    pygame.draw.rect(win, YELLOW, (x + 1, y - CELL_WIDTH + 1, CELL_WIDTH-1, (CELL_WIDTH*2 - 1)), 0)
     pygame.display.update()
 
-def Single_Cell(x, y):
-    pygame.draw.rect(win, BLUE, (x + 1, y + 1, 38, 38), 0)
+
+def knockdown_south_wall(x, y):
+    pygame.draw.rect(win, YELLOW, (x + 1, y + 1, CELL_WIDTH-1, (CELL_WIDTH*2 - 1)), 0)
     pygame.display.update()
+
+
+def single_cell(x, y):
+    pygame.draw.rect(win, BLUE, (x + 1, y + 1, CELL_WIDTH-2, CELL_WIDTH-2), 0)
+    pygame.display.update()
+
 
 def backtracking_cell(x, y):
-    pygame.draw.rect(win, YELLOW, (x + 1, y+1, 38, 38), 0)
+    pygame.draw.rect(win, YELLOW, (x + 1, y+1, CELL_WIDTH-2, CELL_WIDTH-2), 0)
     pygame.display.update()
 
-def Path_tracker(x, y):
+
+def path_tracker(x, y):
     pygame.draw.rect(win, GREEN, (x + 8, y + 8, 10, 10),0)
     pygame.display.update()
 
-def Maze(x, y):
-    Single_Cell(x, y)
+
+def maze(margin=MARGIN):
+    x, y = margin, margin
+    single_cell(x, y)
     stack_list.append((x,y))
     closed_list.append((x,y))
-
 
     while len(stack_list) > 0:
         time.sleep(0.07)
         cell = []
 
-        if(x + cell_width, y) not in closed_list and (x + cell_width, y) in grid:
-            cell.append("East")
+        if(x + CELL_WIDTH, y) not in closed_list and (x + CELL_WIDTH, y) in grid:
+            cell.append("east")
 
-        if (x - cell_width, y) not in closed_list and (x - cell_width, y) in grid:
-            cell.append("West")
+        if (x - CELL_WIDTH, y) not in closed_list and (x - CELL_WIDTH, y) in grid:
+            cell.append("west")
 
-        if (x , y + cell_width) not in closed_list and (x , y + cell_width) in grid:
-            cell.append("South")
+        if (x , y + CELL_WIDTH) not in closed_list and (x , y + CELL_WIDTH) in grid:
+            cell.append("south")
 
-        if (x, y - cell_width) not in closed_list and (x , y - cell_width) in grid:
-            cell.append("North")
+        if (x, y - CELL_WIDTH) not in closed_list and (x , y - CELL_WIDTH) in grid:
+            cell.append("north")
 
         if len(cell) > 0:
             current_cell = (random.choice(cell))
 
-            if current_cell == "East":
-                Knockdown_East_Wall(x,y)
-                path[(x + cell_width, y)] = x, y
-                x = x + cell_width
+            if current_cell == "east":
+                knockdown_east_wall(x,y)
+                path[(x + CELL_WIDTH, y)] = x, y
+                x = x + CELL_WIDTH
                 closed_list.append((x, y))
                 stack_list.append((x, y))
 
-            elif current_cell == "West":
-                Knockdown_West_Wall(x, y)
-                path[(x - cell_width, y)] = x, y
-                x = x - cell_width
+            elif current_cell == "west":
+                knockdown_west_wall(x, y)
+                path[(x - CELL_WIDTH, y)] = x, y
+                x = x - CELL_WIDTH
                 closed_list.append((x, y))
                 stack_list.append((x, y))
 
-            elif current_cell == "North":
-                Knockdown_North_Wall(x, y)
-                path[(x , y - cell_width)] = x, y
-                y = y - cell_width
+            elif current_cell == "north":
+                knockdown_north_wall(x, y)
+                path[(x , y - CELL_WIDTH)] = x, y
+                y = y - CELL_WIDTH
                 closed_list.append((x, y))
                 stack_list.append((x, y))
 
-            elif current_cell == "South":
-                Knockdown_South_Wall(x, y)
-                path[(x , y + cell_width)] = x, y
-                y = y + cell_width
+            elif current_cell == "south":
+                knockdown_south_wall(x, y)
+                path[(x , y + CELL_WIDTH)] = x, y
+                y = y + CELL_WIDTH
                 closed_list.append((x, y))
                 stack_list.append((x, y))
 
         else:
             x, y = stack_list.pop()
-            Single_Cell(x, y)
+            single_cell(x, y)
             time.sleep(0.05)
             backtracking_cell(x, y)
 
+
 def path_tracer(x, y):
-    Path_tracker(x,y)
-    while (x, y) != (40, 40 ):
+    path_tracker(x,y)
+    while (x, y) != (CELL_WIDTH, CELL_WIDTH):
         x, y = path[x, y]
-        Path_tracker(x,y)
+        path_tracker(x,y)
         time.sleep(0.1)
 
-x, y = 40, 40
-build_grid(40, 0, 40)
-Maze(x, y)
-path_tracer(400, 400)
+
+build_grid(WIDTH, HEIGHT)
+maze()
+path_tracer(WIDTH * CELL_WIDTH + MARGIN, HEIGHT * CELL_WIDTH + MARGIN)
 
 RUN = True
 while RUN:
