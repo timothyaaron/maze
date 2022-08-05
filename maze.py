@@ -1,4 +1,5 @@
 import random
+from tkinter.tix import CELL
 import pygame
 
 BLACK = (0, 0, 0)
@@ -30,6 +31,7 @@ pygame.display.update()
 
 grid = []
 path = {}
+connections = []
 
 
 def build_grid(width=WIDTH, height=HEIGHT, cw=CELL_WIDTH):
@@ -42,14 +44,15 @@ def build_grid(width=WIDTH, height=HEIGHT, cw=CELL_WIDTH):
             pygame.draw.line(win, BLACK, [x + cw, y], [x + cw, y + cw], 2) # East wall
             pygame.draw.line(win, BLACK, [x, y + cw], [x + cw, y + cw], 2) # South wall
 
-            grid.append((x, y))
+            grid.append((m, n))
 
 
 def knockdown_cell(coord):
-    pygame.draw.rect(win, WHITE, (coord[0] + 1, coord[1] + 1, CELL_WIDTH - 1, CELL_WIDTH - 1), 0)
+    cw = CELL_WIDTH
+    pygame.draw.rect(win, WHITE, (coord[0] * cw + MARGIN + 1, coord[1] * cw + MARGIN + 1, cw - 1, cw - 1), 0)
 
 
-def build_maze(margin=MARGIN):
+def build_maze():
 
     def _valid_direction(cell):
         return cell not in visited_cells and cell in grid
@@ -57,27 +60,28 @@ def build_maze(margin=MARGIN):
     stack_list = []
     visited_cells = []
 
-    current = margin, margin
+    current = 0, 0
     stack_list.append(current)
     visited_cells.append(current)
 
     while len(stack_list) > 0:
         knockdown_cell(current)
         all_directions = [
-            (current[0] + CELL_WIDTH, current[1]),
-            (current[0] - CELL_WIDTH, current[1]),
-            (current[0], current[1] + CELL_WIDTH),
-            (current[0], current[1] - CELL_WIDTH),
+            (current[0] + 1, current[1]),
+            (current[0] - 1, current[1]),
+            (current[0], current[1] + 1),
+            (current[0], current[1] - 1),
         ]
         valid_directions = [d for d in all_directions if _valid_direction(d)]
 
         if valid_directions:
             selected = random.choice(valid_directions)
-            midway = (current[0] + selected[0]) // 2, (current[1] + selected[1]) // 2
+            midway = (current[0] + selected[0]) / 2, (current[1] + selected[1]) / 2
             knockdown_cell(midway)
             path[selected] = current
             visited_cells.append(selected)
             stack_list.append(selected)
+            connections.append(set([current, selected]))
             current = selected
 
         else:
