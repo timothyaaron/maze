@@ -7,6 +7,13 @@ import maze
 MEMORY_LENGTH = 8
 
 
+# TODO: fade out walls
+# TODO: re:build_maze, prefer neighboring cells that have fewer visited neighbors
+# TODO: start small, finishing opens a harder one
+# TODO: add random connections to add possibility of looping?
+# TODO: show line-of-sight cells
+
+
 maze.build_grid()
 maze.build_maze()
 pygame.display.update()
