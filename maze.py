@@ -26,7 +26,7 @@ pygame.display.set_caption("Maze generator")
 win = pygame.display.set_mode(DISPLAY_SIZE)
 clock = pygame.time.Clock()
 
-win.fill(GREY)
+win.fill(WHITE)
 pygame.display.update()
 
 grid = []
@@ -35,16 +35,20 @@ connections = []
 
 
 def build_grid(width=WIDTH, height=HEIGHT, cw=CELL_WIDTH):
-    for n in range(height):
-        y = cw * n + MARGIN
-        for m in range(width):
-            x = cw * m + MARGIN
-            pygame.draw.line(win, BLACK, [x, y], [x + cw, y], 2) # North wall
-            pygame.draw.line(win, BLACK, [x, y], [x, y + cw], 2) # West wall
-            pygame.draw.line(win, BLACK, [x + cw, y], [x + cw, y + cw], 2) # East wall
-            pygame.draw.line(win, BLACK, [x, y + cw], [x + cw, y + cw], 2) # South wall
+    global grid
+    grid = [(m, n) for n in range(height) for m in range(width)]
 
-            grid.append((m, n))
+    # for n in range(height):
+    #     y = cw * n + MARGIN
+    #     for m in range(width):
+    #         x = cw * m + MARGIN
+
+    #         pygame.draw.line(win, BLACK, [x, y], [x + cw, y], 2) # North wall
+    #         pygame.draw.line(win, BLACK, [x, y], [x, y + cw], 2) # West wall
+    #         pygame.draw.line(win, BLACK, [x + cw, y], [x + cw, y + cw], 2) # East wall
+    #         pygame.draw.line(win, BLACK, [x, y + cw], [x + cw, y + cw], 2) # South wall
+
+    #         grid.append((m, n))
 
 
 def knockdown_cell(coord):
