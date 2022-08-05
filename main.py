@@ -5,7 +5,8 @@ import pygame
 import maze
 
 
-# TODO: fade out trail
+# TODO: grid[]: Cells[]
+# TODO: no initial grid, show sides of Cells as visible
 
 
 maze.build_grid()
