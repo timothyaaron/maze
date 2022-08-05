@@ -4,21 +4,18 @@ import pygame
 
 import maze
 
-
-# TODO: grid[]: Cells[]
-# TODO: no initial grid, show sides of Cells as visible
+MEMORY_LENGTH = 8
 
 
 maze.build_grid()
 maze.build_maze()
 pygame.display.update()
 
-def _to_tracer(coord):
-    return coord * maze.CELL_WIDTH + maze.MARGIN + (maze.CELL_WIDTH - maze.TRACER_WIDTH) // 2
-
 RUN = True
+prev = []
 x = y = 0
-pygame.draw.rect(maze.win, (maze.BLUE), (_to_tracer(x), _to_tracer(y), 20, 20))
+maze.grid[(x, y)].show_walls()
+maze.grid[(x, y)].show_user()
 pygame.display.update()
 
 while RUN:
@@ -32,21 +29,28 @@ while RUN:
             if event.key == pygame.K_ESCAPE:
                 RUN = False
                 break
-            elif event.key == pygame.K_RIGHT and set([(x, y), (x + 1, y)]) in maze.connections:
-                prev = (x, y)
+            elif event.key == pygame.K_RIGHT and (x + 1, y) in maze.grid[(x, y)].connections:
+                prev = [(x, y)] + prev
                 x += 1
-            elif event.key == pygame.K_LEFT and set([(x, y), (x - 1, y)]) in maze.connections:
-                prev = (x, y)
+            elif event.key == pygame.K_LEFT and (x - 1, y) in maze.grid[(x, y)].connections:
+                prev = [(x, y)] + prev
                 x -= 1
-            elif event.key == pygame.K_DOWN and set([(x, y), (x, y + 1)]) in maze.connections:
-                prev = (x, y)
+            elif event.key == pygame.K_DOWN and (x, y + 1) in maze.grid[(x, y)].connections:
+                prev = [(x, y)] + prev
                 y += 1
-            elif event.key == pygame.K_UP and set([(x, y), (x, y - 1)]) in maze.connections:
-                prev = (x, y)
+            elif event.key == pygame.K_UP and (x, y - 1) in maze.grid[(x, y)].connections:
+                prev = [(x, y)] + prev
                 y -= 1
 
-            pygame.draw.rect(maze.win, (maze.GREY), (_to_tracer(prev[0]), _to_tracer(prev[1]), 20, 20))
-            pygame.draw.rect(maze.win, (maze.BLUE), (_to_tracer(x), _to_tracer(y), 20, 20))
+            if prev:
+                maze.grid[prev[0]].hide_user()
+
+            if len(prev) > MEMORY_LENGTH:
+                maze.grid[prev[MEMORY_LENGTH]].hide_walls()
+                prev = prev[:MEMORY_LENGTH]
+
+            maze.grid[(x, y)].show_walls()
+            maze.grid[(x, y)].show_user()
             pygame.display.update()
 
     if (x, y) == (maze.WIDTH - 1, maze.HEIGHT - 1):
