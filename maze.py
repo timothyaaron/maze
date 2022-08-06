@@ -1,5 +1,8 @@
-import random
+import os
+
 import pygame
+
+from algorithms import prim
 
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
@@ -9,14 +12,19 @@ RED = (255, 0, 0)
 GREY = (235, 235, 235)
 
 MARGIN = 10
-CELL_WIDTH = 20
-WIDTH, HEIGHT = 24, 16
+CELL_WIDTH = 30
+WIDTH, HEIGHT = 30, 30
 DISPLAY_SIZE = (
     WIDTH * CELL_WIDTH + MARGIN * 2,
     HEIGHT * CELL_WIDTH + MARGIN * 2
 )
 TRACER_WIDTH = 8
 FPS = 30
+
+SHOW_MAZE = True
+BG_COLOR = GREY
+
+os.environ['SDL_VIDEO_WINDOW_POS'] ="1200,100"
 
 
 pygame.init()
@@ -25,7 +33,7 @@ pygame.display.set_caption("Maze generator")
 win = pygame.display.set_mode(DISPLAY_SIZE)
 clock = pygame.time.Clock()
 
-win.fill(WHITE)
+win.fill(BG_COLOR)
 pygame.display.update()
 
 grid = {}
@@ -44,8 +52,12 @@ class Point:
         }
         self.links = {}
 
+    @property
+    def idx(self):
+        return self.i, self.j
+
     def _to_tracer(self, coord):
-        return coord * CELL_WIDTH + MARGIN + (CELL_WIDTH - TRACER_WIDTH) // 2
+        return coord * CELL_WIDTH + MARGIN + round((CELL_WIDTH - TRACER_WIDTH) / 2)
 
     def hide_user(self):
         pygame.draw.rect(win, (WHITE), (self._to_tracer(self.i), self._to_tracer(self.j), TRACER_WIDTH, TRACER_WIDTH))
@@ -55,7 +67,7 @@ class Point:
 
     def hide_walls(self):
         cw = CELL_WIDTH
-        pygame.draw.rect(win, WHITE, (self.i * cw + MARGIN, self.j * cw + MARGIN, cw, cw), 0) # walls
+        pygame.draw.rect(win, BG_COLOR, (self.i * cw + MARGIN, self.j * cw + MARGIN, cw, cw), 0) # walls
 
     def show_walls(self):
         cw = CELL_WIDTH
@@ -72,36 +84,4 @@ def build_grid(width=WIDTH, height=HEIGHT, cw=CELL_WIDTH):
 
 
 def build_maze():
-
-    def _valid_direction(cell):
-        return cell not in visited_cells and cell in grid
-
-    stack_list = []
-    visited_cells = []
-
-    idx = 0, 0
-    stack_list.append(idx)
-    visited_cells.append(idx)
-
-    while stack_list:
-        valid_directions = [d for d in grid[idx].directions if _valid_direction(d)]
-
-        if valid_directions:
-            new_idx = random.choice(valid_directions)
-
-            path[new_idx] = idx  # do I need this?
-            visited_cells.append(new_idx)
-            stack_list.append(new_idx)
-
-            # link from idx to new_idx
-            absolute_direction = grid[idx].directions[new_idx]
-            grid[idx].links[absolute_direction] = new_idx
-
-            # link from new_idx to idx
-            absolute_direction = grid[new_idx].directions[idx]
-            grid[new_idx].links[absolute_direction] = idx
-
-            idx = new_idx
-
-        else:
-            idx = stack_list.pop()
+    prim.build_maze(grid, path, SHOW_MAZE)
