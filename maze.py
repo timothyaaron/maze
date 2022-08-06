@@ -36,19 +36,15 @@ connections = []
 
 
 class Point:
-    def __init__(self, x, y):
-        self.x = x
-        self.y = y
-        self.center = (
-            MARGIN + x * CELL_WIDTH + CELL_WIDTH // 2,
-            MARGIN + y * CELL_WIDTH + CELL_WIDTH // 2
-        )
+    def __init__(self, i, j):
+        self.i = i
+        self.j = j
         self.possible_connections = set(
             [
-                (x + 1, y),
-                (x - 1, y),
-                (x, y + 1),
-                (x, y - 1),
+                (i + 1, j),
+                (i - 1, j),
+                (i, j + 1),
+                (i, j - 1),
             ]
         )
 
@@ -62,39 +58,39 @@ class Point:
         return coord * CELL_WIDTH + MARGIN + (CELL_WIDTH - TRACER_WIDTH) // 2
 
     def hide_user(self):
-        pygame.draw.rect(win, (WHITE), (self._to_tracer(self.x), self._to_tracer(self.y), TRACER_WIDTH, TRACER_WIDTH))
+        pygame.draw.rect(win, (WHITE), (self._to_tracer(self.i), self._to_tracer(self.j), TRACER_WIDTH, TRACER_WIDTH))
 
     def show_user(self):
-        pygame.draw.rect(win, (BLUE), (self._to_tracer(self.x), self._to_tracer(self.y), TRACER_WIDTH, TRACER_WIDTH))
+        pygame.draw.rect(win, (BLUE), (self._to_tracer(self.i), self._to_tracer(self.j), TRACER_WIDTH, TRACER_WIDTH))
 
     def hide_walls(self):
         cw = CELL_WIDTH
-        pygame.draw.rect(win, WHITE, (self.x * cw + MARGIN, self.y * cw + MARGIN, cw, cw), 0) # walls
+        pygame.draw.rect(win, WHITE, (self.i * cw + MARGIN, self.j * cw + MARGIN, cw, cw), 0) # walls
 
     def show_walls(self):
         cw = CELL_WIDTH
-        pygame.draw.rect(win, BLACK, (self.x * cw + MARGIN, self.y * cw + MARGIN, cw, cw), 0) # walls
-        pygame.draw.rect(win, WHITE, (self.x * cw + MARGIN + 1, self.y * cw + MARGIN + 1, cw - 2, cw - 2), 0) # walls
+        pygame.draw.rect(win, BLACK, (self.i * cw + MARGIN, self.j * cw + MARGIN, cw, cw), 0) # walls
+        pygame.draw.rect(win, WHITE, (self.i * cw + MARGIN + 1, self.j * cw + MARGIN + 1, cw - 2, cw - 2), 0) # walls
         for c in self.connections:
-            midway = (self.x + c[0]) / 2, (self.y + c[1]) / 2
+            midway = (self.i + c[0]) / 2, (self.j + c[1]) / 2
             pygame.draw.rect(win, WHITE, (midway[0] * cw + MARGIN + 1, midway[1] * cw + MARGIN + 1, cw - 2, cw - 2), 0)
 
 
 def build_grid(width=WIDTH, height=HEIGHT, cw=CELL_WIDTH):
     global grid
-    grid = {(m, n): Point(m, n) for n in range(height) for m in range(width)}
+    grid = {(i, j): Point(i, j) for j in range(height) for i in range(width)}
 
-    # for n in range(height):
-    #     y = cw * n + MARGIN
-    #     for m in range(width):
-    #         x = cw * m + MARGIN
+    # for j in range(height):
+    #     y = cw * j + MARGIN
+    #     for i in range(width):
+    #         x = cw * i + MARGIN
 
     #         pygame.draw.line(win, BLACK, [x, y], [x + cw, y], 2) # North wall
     #         pygame.draw.line(win, BLACK, [x, y], [x, y + cw], 2) # West wall
     #         pygame.draw.line(win, BLACK, [x + cw, y], [x + cw, y + cw], 2) # East wall
     #         pygame.draw.line(win, BLACK, [x, y + cw], [x + cw, y + cw], 2) # South wall
 
-    # #         # grid.append((m, n))
+    # #         # grid.append((i, j))
 
 
 def knockdown_cell(coord):
